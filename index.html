@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ĩrhẽζ — Từ điển</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12141a;
+    --ink-2:#191c24;
+    --parchment:#e9e4d4;
+    --parchment-dim:#9a9686;
+    --verdigris:#4fa893;
+    --verdigris-dim:#33564d;
+    --rust:#c97b4a;
+    --line:#2a2e38;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--parchment);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .bg-glyph{
+    position:fixed;
+    top:-8vw; right:-8vw;
+    font-family:'Newsreader',serif;
+    font-size:56vw;
+    line-height:1;
+    color:var(--verdigris);
+    opacity:0.045;
+    pointer-events:none;
+    user-select:none;
+    z-index:0;
+  }
+  header{
+    position:relative;
+    z-index:1;
+    padding:44px 24px 28px;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--verdigris);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:'Newsreader',serif;
+    font-weight:600;
+    font-style:italic;
+    font-size:clamp(38px,11vw,60px);
+    margin:0 0 6px;
+    color:var(--parchment);
+    letter-spacing:0.01em;
+  }
+  .sub{
+    font-size:14.5px;
+    color:var(--parchment-dim);
+    margin:0;
+    max-width:46ch;
+    line-height:1.5;
+  }
+  .count{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--rust);
+    font-weight:500;
+  }
+  main{
+    position:relative;
+    z-index:1;
+    padding:22px 24px 80px;
+    max-width:640px;
+    margin:0 auto;
+  }
+  .search-wrap{
+    position:sticky;
+    top:0;
+    background:var(--ink);
+    padding:16px 0 14px;
+    z-index:5;
+    border-bottom:1px solid var(--line);
+    margin-bottom:18px;
+  }
+  input[type="text"]{
+    width:100%;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    color:var(--parchment);
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    padding:14px 16px;
+    border-radius:2px;
+    outline:none;
+    transition:border-color 0.15s ease;
+  }
+  input[type="text"]::placeholder{color:var(--parchment-dim);}
+  input[type="text"]:focus{border-color:var(--verdigris);}
+  .status{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--parchment-dim);
+    margin-top:10px;
+    letter-spacing:0.02em;
+  }
+  .row{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:4px 16px;
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+    animation:fade 0.25s ease;
+  }
+  @keyframes fade{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:translateY(0);}}
+  .vn{
+    font-size:15px;
+    color:var(--parchment);
+    grid-column:1/3;
+  }
+  .vn mark{
+    background:none;
+    color:var(--rust);
+    font-weight:600;
+  }
+  .forms{
+    grid-column:1/3;
+    display:flex;
+    gap:22px;
+    margin-top:2px;
+  }
+  .form-item{display:flex;flex-direction:column;gap:2px;}
+  .form-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--verdigris-dim);
+  }
+  .form-value{
+    font-family:'JetBrains Mono',monospace;
+    font-size:16px;
+    color:var(--verdigris);
+  }
+  .form-value.mko{color:var(--rust);}
+  .empty, .loading{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--parchment-dim);
+    font-size:14px;
+  }
+  .loading .glyph-spin{
+    display:inline-block;
+    font-family:'Newsreader',serif;
+    font-size:28px;
+    color:var(--verdigris);
+    animation:spin 1.4s linear infinite;
+    margin-bottom:14px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  button.more{
+    display:block;
+    width:100%;
+    margin-top:20px;
+    padding:14px;
+    background:transparent;
+    border:1px solid var(--verdigris-dim);
+    color:var(--verdigris);
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    letter-spacing:0.05em;
+    border-radius:2px;
+    cursor:pointer;
+  }
+  button.more:active{background:var(--verdigris-dim);}
+  footer{
+    text-align:center;
+    padding:30px 20px 50px;
+    color:var(--parchment-dim);
+    font-size:12px;
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:0.03em;
+    position:relative;
+    z-index:1;
+  }
+
+  section.hub{
+    margin-bottom:36px;
+    padding-bottom:30px;
+    border-bottom:1px solid var(--line);
+  }
+  .hub h2{
+    font-family:'Newsreader',serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:24px;
+    margin:0 0 14px;
+    color:var(--parchment);
+  }
+  .video-wrap{
+    width:100%;
+    border-radius:2px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    margin-bottom:10px;
+  }
+  video{width:100%;display:block;background:#000;}
+  .doc-link{
+    display:inline-block;
+    margin-top:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    color:var(--verdigris);
+    text-decoration:none;
+    border:1px solid var(--verdigris-dim);
+    padding:10px 14px;
+    border-radius:2px;
+  }
+  .doc-link:active{background:var(--verdigris-dim);}
+  .phon-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
+  .phon-card{
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:12px 8px;
+    text-align:center;
+  }
+  .phon-sym{
+    font-family:'Newsreader',serif;
+    font-size:26px;
+    color:var(--parchment);
+    margin-bottom:2px;
+  }
+  .phon-read{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--parchment-dim);
+    margin-bottom:8px;
+  }
+  .phon-play{
+    background:transparent;
+    border:1px solid var(--verdigris-dim);
+    color:var(--verdigris);
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    padding:5px 8px;
+    border-radius:2px;
+    width:100%;
+  }
+  .phon-play:active{background:var(--verdigris-dim);}
+</style>
+</head>
+<body>
+
+<div class="bg-glyph">ζ</div>
+
+<header>
+  <p class="eyebrow">ĩrhẽζ · zẽhrĩ</p>
+  <h1>Từ điển</h1>
+  <p class="sub">Tra cứu song song hai hệ chữ — <span class="count" id="totalCount">…</span> mục từ, sinh theo đúng quy tắc âm vị học của ngôn ngữ.</p>
+</header>
+
+<main>
+  <section class="hub">
+    <h2>Video học bảng chữ cái</h2>
+    <div class="video-wrap">
+      <video controls playsinline src="video.mp4"></video>
+    </div>
+    <a class="doc-link" href="tai_lieu_tong_hop.txt" download>⬇ Tải tài liệu tổng hợp (.txt)</a>
+  </section>
+
+  <section class="hub">
+    <h2>Bảng chữ cái & âm đọc</h2>
+    <div class="phon-grid">
+      <div class="phon-card">
+  <div class="phon-sym">a</div>
+  <div class="phon-read">ah</div>
+  <audio preload="none" src="audio_01_a.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">á</div>
+  <div class="phon-read">aah</div>
+  <audio preload="none" src="audio_02_a-dau.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">o</div>
+  <div class="phon-read">oh</div>
+  <audio preload="none" src="audio_03_o.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">õ</div>
+  <div class="phon-read">ohn</div>
+  <audio preload="none" src="audio_04_o-nga.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">ĩ</div>
+  <div class="phon-read">een</div>
+  <audio preload="none" src="audio_05_i-nga.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">í</div>
+  <div class="phon-read">eee</div>
+  <audio preload="none" src="audio_06_i-sac.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">u</div>
+  <div class="phon-read">oo</div>
+  <audio preload="none" src="audio_07_u.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">ụ</div>
+  <div class="phon-read">uh</div>
+  <audio preload="none" src="audio_08_u-nang.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">e</div>
+  <div class="phon-read">eh</div>
+  <audio preload="none" src="audio_09_e.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">ẽ</div>
+  <div class="phon-read">ehn</div>
+  <audio preload="none" src="audio_10_e-nga.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">ê</div>
+  <div class="phon-read">ay</div>
+  <audio preload="none" src="audio_11_e-mu.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">ẻ</div>
+  <div class="phon-read">eh-eh</div>
+  <audio preload="none" src="audio_12_e-hoi.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">h</div>
+  <div class="phon-read">huh</div>
+  <audio preload="none" src="audio_13_h.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">y</div>
+  <div class="phon-read">yuh</div>
+  <audio preload="none" src="audio_14_y.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">k</div>
+  <div class="phon-read">kah</div>
+  <audio preload="none" src="audio_15_k.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">l</div>
+  <div class="phon-read">luh</div>
+  <audio preload="none" src="audio_16_l.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">m</div>
+  <div class="phon-read">muh</div>
+  <audio preload="none" src="audio_17_m.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">n</div>
+  <div class="phon-read">nuh</div>
+  <audio preload="none" src="audio_18_n.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">q</div>
+  <div class="phon-read">kwuh</div>
+  <audio preload="none" src="audio_19_q.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">r</div>
+  <div class="phon-read">ruh</div>
+  <audio preload="none" src="audio_20_r.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">b</div>
+  <div class="phon-read">buh</div>
+  <audio preload="none" src="audio_21_b.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">c</div>
+  <div class="phon-read">chuh</div>
+  <audio preload="none" src="audio_22_c.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">p</div>
+  <div class="phon-read">puh</div>
+  <audio preload="none" src="audio_23_p.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">γ</div>
+  <div class="phon-read">guh</div>
+  <audio preload="none" src="audio_24_gamma.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">∝</div>
+  <div class="phon-read">vuh</div>
+  <audio preload="none" src="audio_25_vo.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">ζ</div>
+  <div class="phon-read">so</div>
+  <audio preload="none" src="audio_26_zeta.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">⩀</div>
+  <div class="phon-read">un</div>
+  <audio preload="none" src="audio_27_un.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">∑</div>
+  <div class="phon-read">oh!</div>
+  <audio preload="none" src="audio_28_sigma-cam-than.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">'</div>
+  <div class="phon-read">uk</div>
+  <audio preload="none" src="audio_29_dau-nhay.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">ɐ</div>
+  <div class="phon-read">uh</div>
+  <audio preload="none" src="audio_30_a-dis.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">Ψ</div>
+  <div class="phon-read">way</div>
+  <audio preload="none" src="audio_31_psi.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">Ω</div>
+  <div class="phon-read">ooh</div>
+  <audio preload="none" src="audio_32_omega.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">ⅹ</div>
+  <div class="phon-read">ks</div>
+  <audio preload="none" src="audio_33_x-dis.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+<div class="phon-card">
+  <div class="phon-sym">⁋</div>
+  <div class="phon-read">pah</div>
+  <audio preload="none" src="audio_34_p-dis.wav"></audio>
+  <button class="phon-play" onclick="this.parentElement.querySelector('audio').play()">▶ Nghe</button>
+</div>
+    </div>
+  </section>
+
+  <div class="search-wrap">
+    <input type="text" id="searchBox" placeholder="Tìm theo tiếng Việt, ĩrhẽζ hoặc zẽhrĩ…" autocomplete="off">
+    <div class="status" id="statusLine">Đang tải dữ liệu…</div>
+  </div>
+  <div id="results">
+    <div class="loading"><div class="glyph-spin">ζ</div><div>Đang tải từ điển…</div></div>
+  </div>
+</main>
+
+<footer>ĩrhẽζ — ngôn ngữ nhân tạo, phát triển liên tục từ V1</footer>
+
+<script>
+let DATA = [];
+let shown = 0;
+const PAGE = 60;
+let currentFiltered = [];
+
+const resultsEl = document.getElementById('results');
+const statusEl = document.getElementById('statusLine');
+const searchBox = document.getElementById('searchBox');
+const totalCountEl = document.getElementById('totalCount');
+
+function norm(s){
+  return s.toLowerCase();
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlight(text, q){
+  if(!q) return escapeHtml(text);
+  const idx = norm(text).indexOf(q);
+  if(idx === -1) return escapeHtml(text);
+  return escapeHtml(text.slice(0,idx)) + '<mark>' + escapeHtml(text.slice(idx,idx+q.length)) + '</mark>' + escapeHtml(text.slice(idx+q.length));
+}
+
+function renderPage(reset){
+  if(reset){
+    resultsEl.innerHTML = '';
+    shown = 0;
+  }
+  const q = norm(searchBox.value.trim());
+  const slice = currentFiltered.slice(shown, shown+PAGE);
+  const frag = document.createDocumentFragment();
+  slice.forEach(([vn, ir, mko]) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `
+      <div class="vn">${highlight(vn,q)}</div>
+      <div class="forms">
+        <div class="form-item"><span class="form-label">ĩrhẽζ</span><span class="form-value">${highlight(ir,q)}</span></div>
+        <div class="form-item"><span class="form-label">zẽhrĩ</span><span class="form-value mko">${highlight(mko,q)}</span></div>
+      </div>
+    `;
+    frag.appendChild(row);
+  });
+  resultsEl.appendChild(frag);
+  shown += slice.length;
+
+  if(shown < currentFiltered.length){
+    const btn = document.createElement('button');
+    btn.className = 'more';
+    btn.textContent = `Xem thêm (còn ${currentFiltered.length - shown})`;
+    btn.onclick = () => { btn.remove(); renderPage(false); };
+    resultsEl.appendChild(btn);
+  }
+
+  if(currentFiltered.length === 0){
+    resultsEl.innerHTML = '<div class="empty">Không tìm thấy mục nào khớp.</div>';
+  }
+}
+
+function doSearch(){
+  const q = norm(searchBox.value.trim());
+  if(!q){
+    currentFiltered = DATA;
+  } else {
+    currentFiltered = DATA.filter(([vn,ir,mko]) =>
+      norm(vn).includes(q) || norm(ir).includes(q) || norm(mko).includes(q)
+    );
+  }
+  statusEl.textContent = q
+    ? `${currentFiltered.length.toLocaleString('vi-VN')} kết quả cho "${searchBox.value.trim()}"`
+    : `Hiển thị ${Math.min(PAGE,currentFiltered.length)} / ${currentFiltered.length.toLocaleString('vi-VN')} mục`;
+  renderPage(true);
+}
+
+let debounceTimer;
+searchBox.addEventListener('input', () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(doSearch, 180);
+});
+
+fetch('vocab_data.json')
+  .then(r => r.json())
+  .then(data => {
+    DATA = data;
+    currentFiltered = DATA;
+    totalCountEl.textContent = DATA.length.toLocaleString('vi-VN');
+    statusEl.textContent = `Hiển thị ${Math.min(PAGE,DATA.length)} / ${DATA.length.toLocaleString('vi-VN')} mục`;
+    renderPage(true);
+  })
+  .catch(err => {
+    resultsEl.innerHTML = '<div class="empty">Không tải được vocab_data.json — kiểm tra file đã được đưa vào cùng thư mục với index.html chưa.</div>';
+    statusEl.textContent = 'Lỗi tải dữ liệu';
+  });
+</script>
+
+</body>
+</html>
